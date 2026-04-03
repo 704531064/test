@@ -1,0 +1,13 @@
+textarea {
+  width: 100%;
+  min-height: 130rpx;
+  border: 1rpx solid #d1d5db;
+  border-radius: 10rpx;
+  padding: 10rpx;
+  background: #fff;
+  box-sizing: border-box;
+  margin-bottom: 8rpx;
+}
+button {
+  margin-right: 10rpx;
+}

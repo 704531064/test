@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>核心KPI看板</title>
+  <style>
+    body{font-family:sans-serif;background:#0f172a;color:#e2e8f0;padding:16px;}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;}
+    .kpi{background:#1e293b;border-radius:10px;padding:14px;}
+    .v{font-size:28px;font-weight:700;}
+  </style>
+</head>
+<body>
+  <h1>试点数据看板（核心 KPI）</h1>
+  <div class="grid">
+    <div class="kpi"><div>注册转化率</div><div class="v" id="kpi1">--</div></div>
+    <div class="kpi"><div>测评完成率</div><div class="v" id="kpi2">--</div></div>
+    <div class="kpi"><div>7日学习完成率</div><div class="v" id="kpi3">--</div></div>
+    <div class="kpi"><div>社区发帖率</div><div class="v" id="kpi4">--</div></div>
+    <div class="kpi"><div>匿名发帖占比</div><div class="v" id="kpi5">--</div></div>
+    <div class="kpi"><div>隐私风险触发率</div><div class="v" id="kpi6">--</div></div>
+  </div>
+  <p>说明：当前为演示数据，正式环境可接入埋点与后端统计。</p>
+<script>
+const demo = [62, 78, 46, 39, 55, 12];
+['kpi1','kpi2','kpi3','kpi4','kpi5','kpi6'].forEach((id,i)=>{
+  document.getElementById(id).innerText = demo[i] + '%';
+});
+</script>
+</body>
+</html>

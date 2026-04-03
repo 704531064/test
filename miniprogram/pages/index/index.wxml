@@ -1,0 +1,97 @@
+<view class="card">
+  <view class="title">账号体系</view>
+  <view class="btn-row">
+    <button size="mini" type="primary" bindtap="loginPhone">手机号登录</button>
+    <button size="mini" bindtap="loginWechat">微信快捷登录</button>
+  </view>
+  <view class="small">{{loginStatus}}</view>
+</view>
+
+<view class="card">
+  <view class="title">入门测评（9题）</view>
+  <block wx:for="{{assessmentQuestions}}" wx:key="index">
+    <view class="small">{{index + 1}}. {{item}}</view>
+    <radio-group data-index="{{index}}" bindchange="setScore">
+      <label wx:for="{{scoreOptions}}" wx:key="*this" style="margin-right: 16rpx;">
+        <radio value="{{item}}" checked="{{scores[index] == item}}" />{{item}}
+      </label>
+    </radio-group>
+  </block>
+  <button size="mini" type="primary" bindtap="submitAssessment">提交测评</button>
+  <view class="small" style="margin-top: 8rpx;">{{personaText}}</view>
+  <view wx:if="{{weekPlan.length}}" class="small">
+    <view class="section-title">周计划</view>
+    <view wx:for="{{weekPlan}}" wx:key="*this">- {{item}}</view>
+  </view>
+</view>
+
+<view class="card">
+  <view class="title">个性化路径（2条×10课）</view>
+  <block wx:for="{{paths}}" wx:key="name">
+    <view class="section-title">{{item.name}}</view>
+    <block wx:for="{{item.units}}" wx:key="id">
+      <view class="small" style="margin-bottom: 8rpx;">
+        <text class="pill">{{item.title}}</text>
+        示例：{{item.example}}
+      </view>
+    </block>
+  </block>
+</view>
+
+<view class="card">
+  <view class="title">可视化演示（3个）</view>
+  <block wx:for="{{demos}}" wx:key="id">
+    <view class="small"><text class="pill">{{item.title}}</text>{{item.description}}</view>
+  </block>
+</view>
+
+<view class="card">
+  <view class="title">练习与复习</view>
+  <view class="btn-row">
+    <button size="mini" bindtap="showFlashcard">抽取闪卡</button>
+    <button size="mini" bindtap="setReminder">设置间隔复习</button>
+  </view>
+  <view class="small">{{flashcardText}}</view>
+</view>
+
+<view class="card">
+  <view class="title">社区（作品墙/提问区）</view>
+  <textarea placeholder="发布你的作品或问题（可匿名/脱敏）" value="{{postText}}" bindinput="onPostInput" maxlength="500" />
+  <view class="btn-row">
+    <label><checkbox checked="{{anonymous}}" bindtap="toggleAnonymous" />匿名</label>
+    <label><checkbox checked="{{desensitize}}" bindtap="toggleDesensitize" />自动脱敏</label>
+    <button size="mini" type="primary" bindtap="publishPost">发布</button>
+  </view>
+  <block wx:for="{{community}}" wx:key="id">
+    <view style="border: 1rpx solid #e5e7eb; border-radius: 12rpx; padding: 10rpx; margin-top: 8rpx;">
+      <view>{{item.user}}：{{item.content}}</view>
+      <view class="btn-row">
+        <button size="mini" data-id="{{item.id}}" bindtap="likePost">点赞 {{item.likes}}</button>
+        <button size="mini" data-id="{{item.id}}" bindtap="favPost">收藏 {{item.favs}}</button>
+      </view>
+    </view>
+  </block>
+</view>
+
+<view class="card">
+  <view class="title">助教答疑</view>
+  <view class="small">{{assistantText}}</view>
+</view>
+
+<view class="card">
+  <view class="title">隐私安全与数据权益</view>
+  <textarea placeholder="输入文本做敏感信息检测" value="{{riskText}}" bindinput="onRiskInput" maxlength="500" />
+  <view class="btn-row">
+    <button size="mini" bindtap="checkRisk">检测风险</button>
+    <button size="mini" bindtap="exportData">导出数据</button>
+    <button size="mini" bindtap="deleteData">删除数据</button>
+  </view>
+  <view class="small">{{riskResult}}</view>
+</view>
+
+<view class="card">
+  <view class="btn-row">
+    <navigator url="/pages/admin/admin"><button size="mini">进入后台</button></navigator>
+    <navigator url="/pages/dashboard/dashboard"><button size="mini">查看看板</button></navigator>
+  </view>
+</view>

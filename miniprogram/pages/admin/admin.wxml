@@ -1,0 +1,27 @@
+<view class="card">
+  <view class="title">内容上下架</view>
+  <block wx:for="{{paths}}" wx:key="name">
+    <view style="margin-bottom: 8rpx;">
+      <text>{{item.name}}：</text>
+      <text class="pill">{{item.online ? '已上架' : '已下架'}}</text>
+      <switch checked="{{item.online}}" data-name="{{item.name}}" bindchange="toggleShelf" />
+    </view>
+  </block>
+</view>
+
+<view class="card">
+  <view class="title">模板编辑</view>
+  <textarea placeholder="输入课件模板：背景/目标/输出格式" value="{{template}}" bindinput="onTplInput" />
+  <button size="mini" type="primary" bindtap="saveTpl">保存模板</button>
+  <view class="small">{{tplResult}}</view>
+</view>
+
+<view class="card">
+  <view class="title">审核队列</view>
+  <textarea placeholder="输入待审核内容" value="{{reviewText}}" bindinput="onReviewInput" />
+  <view class="btn-row">
+    <button size="mini" bindtap="reviewPass">审核通过</button>
+    <button size="mini" bindtap="reviewReject">驳回</button>
+  </view>
+  <view class="small">{{reviewResult}}</view>
+</view>

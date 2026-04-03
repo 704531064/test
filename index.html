@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>银发AI同行</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 0; background:#f6f8fb; color:#222; }
+    header { background:#2563eb; color:white; padding:14px 16px; position:sticky; top:0; }
+    main { padding: 12px; max-width: 980px; margin: 0 auto; }
+    .card { background:#fff; border-radius:12px; padding:12px; margin-bottom:12px; box-shadow:0 1px 3px rgba(0,0,0,.08); }
+    h2 { font-size:18px; margin:0 0 8px; }
+    h3 { font-size:16px; margin:8px 0; }
+    input, textarea, select, button { padding:8px; border-radius:8px; border:1px solid #d0d7de; font-size:14px; }
+    button { background:#2563eb; color:#fff; border:none; cursor:pointer; }
+    button.secondary { background:#0f766e; }
+    .row { display:flex; gap:8px; flex-wrap:wrap; }
+    .pill { display:inline-block; padding:4px 10px; border-radius:999px; background:#e0e7ff; font-size:12px; margin-right:6px; }
+    .hidden { display:none; }
+    .small { font-size:12px; color:#555; }
+    .grid2 { display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
+    @media(max-width:700px){ .grid2{ grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+<header><strong>银发AI同行（H5试点版）</strong></header>
+<main>
+  <section class="card" id="authBox">
+    <h2>1) 账号体系</h2>
+    <div class="row">
+      <button onclick="login('phone')">手机号登录</button>
+      <button class="secondary" onclick="login('wechat')">微信快捷登录</button>
+    </div>
+    <p class="small">二选一，首次登录即注册，减少步骤。</p>
+    <p id="loginStatus">未登录</p>
+  </section>
+
+  <section class="card">
+    <h2>2) 入门测评（9题）</h2>
+    <div id="quiz"></div>
+    <button onclick="submitAssessment()">提交测评并生成画像</button>
+    <div id="persona" class="small"></div>
+    <div id="weekPlan"></div>
+  </section>
+
+  <section class="card">
+    <h2>3) 个性化学习路径（2条）</h2>
+    <div id="paths"></div>
+  </section>
+
+  <section class="card">
+    <h2>4) 可视化演示（3个）</h2>
+    <div id="demos"></div>
+  </section>
+
+  <section class="card">
+    <h2>5) 练习与复习</h2>
+    <button onclick="showFlashcard()">抽取闪卡</button>
+    <button class="secondary" onclick="setReminder()">设置间隔复习提醒</button>
+    <p id="flashcard"></p>
+  </section>
+
+  <section class="card">
+    <h2>6) 社区（作品墙 / 提问区）</h2>
+    <textarea id="postText" rows="3" placeholder="发布你的作品或问题（支持匿名与脱敏）"></textarea>
+    <div class="row">
+      <label><input type="checkbox" id="anonymous" /> 匿名发布</label>
+      <label><input type="checkbox" id="desensitize" checked /> 自动脱敏</label>
+      <button onclick="publishPost()">发布</button>
+    </div>
+    <div id="community"></div>
+  </section>
+
+  <section class="card">
+    <h2>7) 助教答疑</h2>
+    <p id="assistant"></p>
+  </section>
+
+  <section class="card">
+    <h2>8) 隐私安全与数据权益</h2>
+    <textarea id="riskText" rows="3" placeholder="输入文本做敏感信息检测"></textarea>
+    <div class="row">
+      <button onclick="checkRisk()">检测风险</button>
+      <button class="secondary" onclick="exportData()">导出我的数据</button>
+      <button onclick="deleteData()">删除我的数据</button>
+    </div>
+    <div id="riskResult" class="small"></div>
+  </section>
+</main>
+<script>
+const assessmentQuestions = [
+  '我对 AI 基础概念了解程度（1-5）',
+  '我会用 AI 完成文字工作（1-5）',
+  '我担心 AI 误导信息（1-5）',
+  '我担心隐私泄露（1-5）',
+  '我每周愿意学习 AI 的时间（1-5）',
+  '我希望 AI 帮助办公效率（1-5）',
+  '我希望 AI 帮助生活决策（1-5）',
+  '我愿意在社区分享实践（1-5）',
+  '我希望获得助教支持（1-5）'
+];
+
+let contentData = { paths: [], demos: [], flashcards: [], assistant: {} };
+let state = { user: null, community: JSON.parse(localStorage.getItem('community') || '[]') };
+
+function renderAssessment() {
+  document.getElementById('quiz').innerHTML = assessmentQuestions.map((q, i) => `
+    <div style="margin-bottom:6px;">
+      <label>${i+1}. ${q}</label>
+      <select id="q${i}">${[1,2,3,4,5].map(v => `<option value="${v}">${v}</option>`).join('')}</select>
+    </div>
+  `).join('');
+}
+
+function login(type) {
+  state.user = { id: Date.now(), type, name: type === 'phone' ? '手机用户' : '微信用户' };
+  document.getElementById('loginStatus').innerText = `已登录：${state.user.name}（${type}）`;
+}
+
+function submitAssessment() {
+  const scores = assessmentQuestions.map((_, i) => Number(document.getElementById(`q${i}`).value));
+  const cognition = (scores[0] + scores[1]) / 2;
+  const anxiety = (scores[2] + scores[3]) / 2;
+  const scenarioOffice = scores[5];
+  const persona = cognition < 3 ? 'AI新手探索者' : (anxiety > 3 ? '谨慎实践者' : '进阶应用者');
+  document.getElementById('persona').innerText = `你的画像：${persona}；认知分 ${cognition.toFixed(1)}，焦虑分 ${anxiety.toFixed(1)}。`;
+  const plan = scenarioOffice >= 4 ? ['D1 测评回看', 'D2 办公路径课1-2', 'D3 办公路径课3+练习', 'D4 引用核验演示', 'D5 办公路径课4-5', 'D6 社区发布作品', 'D7 小测复盘']
+                                   : ['D1 测评回看', 'D2 生活路径课1-2', 'D3 脱敏演示练习', 'D4 生活路径课3+闪卡', 'D5 提示词对比演示', 'D6 社区提问交流', 'D7 小测复盘'];
+  document.getElementById('weekPlan').innerHTML = '<h3>你的周计划</h3><ol>' + plan.map(d => `<li>${d}</li>`).join('') + '</ol>';
+}
+
+function renderPaths() {
+  document.getElementById('paths').innerHTML = contentData.paths.map(path => `
+    <div class="card">
+      <h3>${path.name}（10个微课）</h3>
+      ${path.units.map(u => `
+        <details>
+          <summary>${u.title}</summary>
+          <p><strong>示例：</strong>${u.example}</p>
+          <p><strong>练习：</strong>${u.exercise}</p>
+          <p><strong>校验清单：</strong>${u.checklist.join(' / ')}</p>
+          <p><strong>小测：</strong>${u.quiz.question}</p>
+        </details>
+      `).join('')}
+    </div>
+  `).join('');
+}
+
+function renderDemos() {
+  document.getElementById('demos').innerHTML = contentData.demos.map(d => `<p><span class="pill">${d.title}</span>${d.description}</p>`).join('');
+  document.getElementById('assistant').innerText = `${contentData.assistant.weekly_live || ''}；${contentData.assistant.group_qa || ''}`;
+}
+
+function showFlashcard() {
+  const card = contentData.flashcards[Math.floor(Math.random() * contentData.flashcards.length)];
+  document.getElementById('flashcard').innerText = `${card.q} —— ${card.a}`;
+}
+
+function setReminder() {
+  localStorage.setItem('reviewPlan', JSON.stringify(['+1天', '+3天', '+7天']));
+  alert('已设置轻量间隔复习提醒：1天、3天、7天（本地记录）');
+}
+
+function maskSensitive(text) {
+  return text
+    .replace(/1\d{10}/g, '1**********')
+    .replace(/\d{17}[\dXx]/g, '******************');
+}
+
+function publishPost() {
+  const text = document.getElementById('postText').value.trim();
+  if (!text) return;
+  const post = {
+    id: Date.now(),
+    user: document.getElementById('anonymous').checked ? '匿名用户' : (state.user?.name || '访客'),
+    content: document.getElementById('desensitize').checked ? maskSensitive(text) : text,
+    likes: 0,
+    favs: 0
+  };
+  state.community.unshift(post);
+  localStorage.setItem('community', JSON.stringify(state.community));
+  renderCommunity();
+  document.getElementById('postText').value = '';
+}
+
+function renderCommunity() {
+  const list = state.community.map(p => `
+    <div class="card">
+      <p>${p.user}：${p.content}</p>
+      <div class="row">
+        <button onclick="act(${p.id}, 'like')">点赞 ${p.likes}</button>
+        <button class="secondary" onclick="act(${p.id}, 'fav')">收藏 ${p.favs}</button>
+      </div>
+    </div>
+  `).join('');
+  document.getElementById('community').innerHTML = list || '<p class="small">还没有内容，发布第一条吧。</p>';
+}
+
+function act(id, type) {
+  state.community = state.community.map(p => p.id === id ? { ...p, likes: p.likes + (type === 'like' ? 1 : 0), favs: p.favs + (type === 'fav' ? 1 : 0) } : p);
+  localStorage.setItem('community', JSON.stringify(state.community));
+  renderCommunity();
+}
+
+function checkRisk() {
+  const text = document.getElementById('riskText').value;
+  const hits = [];
+  if (/1\d{10}/.test(text)) hits.push('手机号');
+  if (/\d{17}[\dXx]/.test(text)) hits.push('身份证号');
+  if (/银行卡|密码|验证码/.test(text)) hits.push('高风险关键词');
+  const warning = /保证收益|医疗诊断|投资内幕/.test(text) ? '存在内容风险，请勿直接执行。' : '未发现明显内容风险。';
+  document.getElementById('riskResult').innerText = hits.length ? `检测到敏感信息：${hits.join('、')}。建议脱敏后发布。${warning}` : warning;
+}
+
+function exportData() {
+  const blob = new Blob([JSON.stringify({ user: state.user, community: state.community, reviewPlan: localStorage.getItem('reviewPlan') }, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'my_data_export.json';
+  a.click();
+}
+
+function deleteData() {
+  localStorage.removeItem('community');
+  localStorage.removeItem('reviewPlan');
+  state.community = [];
+  renderCommunity();
+  alert('已删除本地用户数据。');
+}
+
+fetch('./data/courses.json').then(r => r.json()).then(json => {
+  contentData = json;
+  renderPaths();
+  renderDemos();
+}).catch(() => {
+  document.getElementById('paths').innerText = '课程加载失败';
+});
+
+renderAssessment();
+renderCommunity();
+</script>
+</body>
+</html>
