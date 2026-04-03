@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>内容管理后台</title>
+  <style>
+    body{font-family:sans-serif;background:#f7f7f9;margin:0;padding:16px;}
+    .card{background:#fff;border-radius:10px;padding:12px;margin-bottom:12px;}
+    button,input,textarea{padding:8px;border-radius:8px;border:1px solid #ccc;margin-right:6px;}
+    button{background:#111827;color:#fff;border:none;}
+  </style>
+</head>
+<body>
+  <h1>内容管理后台（最简可用）</h1>
+  <div class="card">
+    <h3>内容上下架</h3>
+    <p>模拟路径课程上架/下架状态（本地存储）。</p>
+    <div id="shelves"></div>
+  </div>
+  <div class="card">
+    <h3>模板编辑</h3>
+    <textarea id="tpl" rows="4" cols="70" placeholder="输入课件模板，比如：任务背景/目标/输出格式"></textarea><br>
+    <button onclick="saveTpl()">保存模板</button>
+    <p id="tplResult"></p>
+  </div>
+  <div class="card">
+    <h3>审核队列</h3>
+    <textarea id="reviewInput" rows="3" cols="70" placeholder="输入待审核内容"></textarea><br>
+    <button onclick="review('pass')">审核通过</button>
+    <button onclick="review('reject')">驳回</button>
+    <p id="reviewResult"></p>
+  </div>
+
+<script>
+const paths = ['办公增效', '生活助手'];
+let shelfState = JSON.parse(localStorage.getItem('shelfState') || '{}');
+
+function renderShelves(){
+  document.getElementById('shelves').innerHTML = paths.map(p=>{
+    const on = shelfState[p] !== false;
+    return `<p>${p}：<strong>${on ? '已上架' : '已下架'}</strong> <button onclick="toggle('${p}')">切换</button></p>`
+  }).join('');
+}
+function toggle(path){
+  shelfState[path] = !(shelfState[path] !== false);
+  localStorage.setItem('shelfState', JSON.stringify(shelfState));
+  renderShelves();
+}
+function saveTpl(){
+  const v = document.getElementById('tpl').value.trim();
+  localStorage.setItem('courseTemplate', v);
+  document.getElementById('tplResult').innerText = '模板已保存';
+}
+function review(status){
+  const text = document.getElementById('reviewInput').value.trim();
+  if(!text){ document.getElementById('reviewResult').innerText='请输入待审核内容'; return; }
+  document.getElementById('reviewResult').innerText = `内容“${text.slice(0,20)}...”审核结果：${status==='pass'?'通过':'驳回'}`;
+}
+renderShelves();
+</script>
+</body>
+</html>

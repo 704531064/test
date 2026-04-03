@@ -1,0 +1,15 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/admin/admin",
+    "pages/dashboard/dashboard"
+  ],
+  "window": {
+    "navigationBarTitleText": "银发AI同行",
+    "navigationBarBackgroundColor": "#2563eb",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#f6f8fb"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

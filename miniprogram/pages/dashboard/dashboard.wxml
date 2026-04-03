@@ -1,0 +1,9 @@
+<view class="card">
+  <view class="title">试点数据看板（核心 KPI）</view>
+  <view class="small">演示数据，可替换为埋点统计。</view>
+</view>
+
+<view class="card" wx:for="{{kpis}}" wx:key="name">
+  <view>{{item.name}}</view>
+  <view style="font-size: 48rpx; font-weight: bold; color: #1d4ed8;">{{item.value}}%</view>
+</view>
