@@ -6,8 +6,8 @@
 
 1. 打开微信开发者工具，点击「新建项目」。
 2. `AppID` 可用测试号（`touristappid`）先本地调试。
-3. 选择项目目录：`/workspace/test/miniprogram`。
-4. 点击创建后即可预览以下页面：
+3. 选择项目目录：`/workspace/test`（已支持仓库根目录直接导入）。
+4. 点击创建后即可预览以下页面（小程序代码位于 `miniprogram/`）：
    - 学习主页：`pages/index/index`
    - 内容后台：`pages/admin/admin`
    - KPI 看板：`pages/dashboard/dashboard`
